@@ -12,4 +12,5 @@
 2. 執行"python3 cvt_exam.py"，會自動讀取"font_lib.bin"並把所有文字顯示一遍
 
 **補充說明**
+
 此字型庫是給little-endian MCU使用，esp32/arm都屬於此類，如需要big-endian請自行修改struct指令
