@@ -58,7 +58,7 @@ class Converter:
         #[format version: uint8_t][char cnt: uint32_t][font height: uint16_t][index offset: uint32_t][font library offset: uint32_t][desc: char x n]
         
         desc=(self.fon_path+",%d"%(self.font_height)).encode()+bytes(1)
-        version=2
+        version=3
         char_cnt=len(idx_list)
         font_height=self.font_total_height
         index_offset=1+4+2+4+4+len(desc)
@@ -74,9 +74,9 @@ class Converter:
         idx_offset_map={}
 
         for idx in idx_list:
-            word_width,word_height,word_y_offset,word_bin=self.word_info_map[idx]
+            word_width,word_height,word_x_offset,word_y_offset,word_bin=self.word_info_map[idx]
             word_len=len(word_bin)
-            word_info=struct.pack('<BBBH',word_width,word_height,word_y_offset,word_len)+word_bin
+            word_info=struct.pack('<BBBBH',word_width,word_height,word_x_offset,word_y_offset,word_len)+word_bin
 
             idx_offset_map[idx]=bin_base_offset
             font_bin+=word_info
@@ -130,7 +130,7 @@ class Converter:
         if(left>right):#遇到無法顯示的文字，預設空白1/4字高
             left=0
             word_width=math.floor(self.font_height/4)
-            self.word_info_map[word_idx]=(word_width,0,scan_range,bytes(0))
+            self.word_info_map[word_idx]=(word_width,0,0,scan_range,bytes(0))
             return
 
         #extra bin info
@@ -143,7 +143,8 @@ class Converter:
         word_width=right-left+1
         word_height=bottom-top+1
         word_y_offset=top
-        self.word_info_map[word_idx]=(word_width,word_height,word_y_offset,word_bin)
+        word_x_offset=left
+        self.word_info_map[word_idx]=(word_width,word_height,word_x_offset,word_y_offset,word_bin)
 
     def update_screen(self):
         if(self.flag.is_set()==False or self.char_vec_len<=self.idx):

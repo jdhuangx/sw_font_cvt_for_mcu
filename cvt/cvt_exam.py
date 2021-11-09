@@ -72,12 +72,12 @@ class Tester:
                 word_idx_ba.reverse()
                 word=word_idx_ba.decode('utf-8')
 
-                word_width,word_height,word_y_offset,word_byte_len=struct.unpack('<BBBH',font_bin[word_offset:(word_offset+5)])
+                word_width,word_height,word_x_offset,word_y_offset,word_byte_len=struct.unpack('<BBBBH',font_bin[word_offset:(word_offset+6)])
                 word_ba=font_bin[(word_offset+5):(word_offset+5+word_byte_len)]
                 
-                print("%s,%d,%d,%d,%d"%(word,word_width,word_height,word_y_offset,word_byte_len))
+                print("%s,%d,%d,%d,%d,%d"%(word,word_width,word_height,word_x_offset,word_y_offset,word_byte_len))
                 self.char_list.append(word)
-                self.char_bin_map[word]=(word_width,word_height,word_y_offset,word_ba)
+                self.char_bin_map[word]=(word_width,word_height,word_x_offset,word_y_offset,word_ba)
 
     def update_screen(self):
         if(self.flag.is_set()==False or self.char_cnt<=self.idx):
@@ -85,7 +85,7 @@ class Tester:
             return
 
         word=self.char_list[self.idx]
-        word_width,word_height,word_y_offset,word_ba=self.char_bin_map[word]
+        word_width,word_height,word_x_offset,word_y_offset,word_ba=self.char_bin_map[word]
 
 
         self.draw.rectangle((0,0,200,200),fill=(255,255,255))
@@ -95,9 +95,9 @@ class Tester:
             for x in range(word_width):
                 gray=255-word_ba[word_width*y+x]
                 if(gray==255):
-                    self.buf_img.putpixel((x+x_draw_offset,y+word_y_offset),(0,gray,0))
+                    self.buf_img.putpixel((x+word_x_offset+x_draw_offset,y+word_y_offset),(0,gray,0))
                 else:
-                    self.buf_img.putpixel((x+x_draw_offset,y+word_y_offset),(gray,gray,gray))
+                    self.buf_img.putpixel((x+word_x_offset+x_draw_offset,y+word_y_offset),(gray,gray,gray))
 
         self.cvt_image = ImageTk.PhotoImage(self.buf_img)
         canvas.itemconfig(self.tk_img,image=self.cvt_image)
