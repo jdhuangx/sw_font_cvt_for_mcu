@@ -74,9 +74,9 @@ class Converter:
         idx_offset_map={}
 
         for idx in idx_list:
-            word_width,word_height,word_x_offset,word_y_offset,word_bin=self.word_info_map[idx]
+            word_width,word_height,word_x_offset,word_y_offset,word_actual_width,word_bin=self.word_info_map[idx]
             word_len=len(word_bin)
-            word_info=struct.pack('<BBBBH',word_width,word_height,word_x_offset,word_y_offset,word_len)+word_bin
+            word_info=struct.pack('<BBBBBH',word_width,word_height,word_x_offset,word_y_offset,word_actual_width,word_len)+word_bin
 
             idx_offset_map[idx]=bin_base_offset
             font_bin+=word_info
@@ -99,6 +99,8 @@ class Converter:
         print('total %d words'%(char_cnt))
 
     def extra_bin_info(self,word):
+        word_actual_width=self.font.getsize(word)[0]
+        print(word_actual_width)
         word_idx=int.from_bytes(word.encode(),"big")
         print("%s:\t%d"%(word,word_idx))
 
@@ -130,7 +132,7 @@ class Converter:
         if(left>right):#遇到無法顯示的文字，預設空白1/4字高
             left=0
             word_width=math.floor(self.font_height/4)
-            self.word_info_map[word_idx]=(word_width,0,0,scan_range,bytes(0))
+            self.word_info_map[word_idx]=(word_width,0,0,0,scan_range,bytes(0))
             return
 
         #extra bin info
@@ -144,7 +146,7 @@ class Converter:
         word_height=bottom-top+1
         word_y_offset=top
         word_x_offset=left
-        self.word_info_map[word_idx]=(word_width,word_height,word_x_offset,word_y_offset,word_bin)
+        self.word_info_map[word_idx]=(word_width,word_height,word_x_offset,word_y_offset,word_actual_width,word_bin)
 
     def update_screen(self):
         if(self.flag.is_set()==False or self.char_vec_len<=self.idx):
